@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radeennn — Software Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #1a1a1a;
+    --border: #222;
+    --text: #e8e8e8;
+    --muted: #666;
+    --accent: #f0f0f0;
+    --green: #4ade80;
+    --yellow: #facc15;
+    --red: #f87171;
+    --blue: #60a5fa;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px;
+    background: rgba(10,10,10,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -1px;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 24px; list-style: none; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-kbd {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: var(--mono);
+  }
+  .nav-search-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .nav-search-btn:hover { border-color: #444; color: var(--accent); }
+  .nav-search-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .nav-theme {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 16px; padding: 4px;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+  .nav-theme:hover { color: var(--accent); }
+
+  /* COMMAND PALETTE */
+  .cmd-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    align-items: flex-start; justify-content: center;
+    padding-top: 80px;
+  }
+  .cmd-overlay.open { display: flex; }
+  .cmd-box {
+    width: 100%; max-width: 480px;
+    background: var(--bg2);
+    border: 1px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+    animation: cmdIn 0.15s ease both;
+  }
+  @keyframes cmdIn {
+    from { opacity: 0; transform: scale(0.97) translateY(-8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .cmd-input-wrap {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cmd-input-wrap svg { color: var(--muted); flex-shrink: 0; }
+  .cmd-input {
+    flex: 1;
+    background: none; border: none; outline: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .cmd-input::placeholder { color: var(--muted); }
+  .cmd-esc {
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .cmd-results { padding: 8px; max-height: 300px; overflow-y: auto; }
+  .cmd-section-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 6px 8px 4px;
+  }
+  .cmd-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text);
+    transition: background 0.15s;
+    text-decoration: none;
+  }
+  .cmd-item:hover, .cmd-item.active { background: var(--bg3); color: var(--accent); }
+  .cmd-item-icon { color: var(--muted); font-size: 13px; width: 18px; text-align: center; flex-shrink: 0; }
+  .cmd-empty { text-align: center; padding: 24px; color: var(--muted); font-size: 12px; }
+
+  /* LIGHT THEME */
+  body.light {
+    --bg: #f8f8f8;
+    --bg2: #ffffff;
+    --bg3: #f0f0f0;
+    --border: #e0e0e0;
+    --text: #111111;
+    --muted: #888888;
+    --accent: #0a0a0a;
+  }
+  body.light nav { background: rgba(248,248,248,0.9); }
+  body.light ::-webkit-scrollbar-track { background: var(--bg); }
+  body.light ::-webkit-scrollbar-thumb { background: #ccc; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 100px 32px 60px;
+    max-width: 900px; margin: 0 auto;
+    position: relative;
+  }
+  .hero-inner { width: 100%; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 6px 14px; border-radius: 100px;
+    font-size: 11px; color: var(--muted);
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .badge-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .hero-name {
+    font-family: var(--sans);
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -3px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero-title {
+    font-family: var(--sans);
+    font-size: clamp(18px, 3vw, 28px);
+    font-weight: 400;
+    color: var(--muted);
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .hero-desc {
+    font-size: 13px;
+    color: #888;
+    max-width: 520px;
+    line-height: 1.8;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+  .hero-links {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 700;
+  }
+  .btn-primary:hover { background: #ccc; }
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { border-color: #555; background: var(--bg2); }
+  .btn-wa {
+    background: #25d366;
+    color: #fff;
+    font-weight: 700;
+  }
+  .btn-wa:hover { background: #1ebe5b; }
+  .hero-scroll {
+    position: absolute; bottom: 32px; left: 32px;
+    display: flex; align-items: center; gap: 10px;
+    color: var(--muted); font-size: 11px;
+    animation: fadeUp 0.6s 0.8s ease both;
+  }
+  .scroll-line {
+    width: 40px; height: 1px;
+    background: var(--muted);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTION */
+  section { padding: 80px 32px; max-width: 900px; margin: 0 auto; }
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--muted);
+  }
+  .section-title {
+    font-family: var(--sans);
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: var(--accent);
+    margin-bottom: 40px;
+    line-height: 1.1;
+  }
+  .section-divider {
+    width: 100%; height: 1px;
+    background: var(--border);
+    margin: 0 0 80px;
+  }
+
+  /* ABOUT */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  .about-text p { color: #888; margin-bottom: 16px; font-size: 13px; line-height: 1.9; }
+  .about-text p span { color: var(--accent); }
+  .about-info { display: flex; flex-direction: column; gap: 12px; }
+  .info-row {
+    display: flex; gap: 12px;
+    align-items: center;
+    padding: 10px 16px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .info-icon { color: var(--muted); font-size: 14px; width: 16px; text-align: center; }
+  .info-label { color: var(--muted); }
+  .info-val { color: var(--accent); margin-left: auto; text-align: right; }
+
+  /* SKILLS */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .skill-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .skill-card:hover { border-color: #444; transform: translateY(-2px); }
+  .skill-card-title {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .skill-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .skill-tag {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: #aaa;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .skill-tag:hover { border-color: #555; color: var(--accent); background: #1f1f1f; }
+
+  /* STACK ICONS */
+  .stack-row {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 32px;
+  }
+  .stack-icon {
+    width: 36px; height: 36px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .stack-icon:hover { border-color: #555; transform: translateY(-2px); }
+
+  /* EXPERIENCE */
+  .exp-list { display: flex; flex-direction: column; gap: 0; }
+  .exp-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .exp-item:first-child { padding-top: 0; }
+  .exp-company {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+  .exp-role {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .exp-period {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+  .exp-type {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .exp-type.present {
+    background: rgba(74, 222, 128, 0.08);
+    border-color: rgba(74, 222, 128, 0.3);
+    color: var(--green);
+  }
+
+  /* PROJECTS */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .project-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .project-card:hover { border-color: #333; transform: translateY(-2px); }
+  .project-card:hover::before { opacity: 1; }
+  .project-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .project-name {
+    font-family: var(--sans);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .project-date { font-size: 11px; color: var(--muted); }
+  .project-desc { font-size: 12px; color: #777; line-height: 1.8; margin-bottom: 16px; }
+  .project-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .project-tag {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .project-links { display: flex; gap: 10px; }
+  .project-link {
+    font-size: 11px;
+    color: var(--muted);
+    text-decoration: none;
+    display: flex; align-items: center; gap: 5px;
+    transition: color 0.2s;
+  }
+  .project-link:hover { color: var(--accent); }
+
+  /* CERTIFICATES */
+  .cert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .cert-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    transition: border-color 0.2s;
+  }
+  .cert-card:hover { border-color: #444; }
+  .cert-name { font-size: 13px; color: var(--accent); font-family: var(--sans); font-weight: 700; margin-bottom: 4px; }
+  .cert-issuer { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .cert-year {
+    font-size: 10px; color: var(--blue);
+    background: rgba(96, 165, 250, 0.08);
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    display: inline-block;
+    padding: 2px 8px; border-radius: 3px;
+  }
+
+  /* CONTACT */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .contact-text h3 {
+    font-family: var(--sans);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .contact-text p { font-size: 12px; color: #777; line-height: 1.9; margin-bottom: 24px; }
+  .contact-links { display: flex; flex-direction: column; gap: 10px; }
+  .contact-link-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color 0.2s;
+    font-size: 12px;
+  }
+  .contact-link-item:hover { border-color: #444; }
+  .contact-icon { font-size: 16px; width: 20px; text-align: center; }
+  .contact-label { color: var(--muted); font-size: 11px; }
+  .contact-val { color: var(--accent); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 32px;
+    max-width: 900px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .footer-text { font-size: 11px; color: var(--muted); }
+  .footer-text a { color: #555; text-decoration: none; }
+  .footer-text a:hover { color: var(--accent); }
+  .footer-socials { display: flex; gap: 12px; }
+  .footer-social {
+    width: 32px; height: 32px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .footer-social:hover { border-color: #444; color: var(--accent); }
+
+  /* MOBILE NAV TOGGLE */
+  .nav-mobile-toggle {
+    display: none;
+    background: none; border: none;
+    color: var(--muted); cursor: pointer; font-size: 18px;
+  }
+
+  /* PRICING CARDS (Store) */
+  .store-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .price-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    display: flex; flex-direction: column; gap: 16px;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+  }
+  .price-card:hover { border-color: #444; transform: translateY(-3px); }
+  .price-card.featured {
+    border-color: rgba(250,204,21,0.4);
+    background: rgba(250,204,21,0.03);
+  }
+  .price-badge {
+    position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+    background: var(--yellow);
+    color: #000;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .price-card-name { font-family: var(--sans); font-weight: 700; font-size: 15px; color: var(--accent); }
+  .price-amount { font-family: var(--sans); font-size: 22px; font-weight: 800; color: var(--accent); line-height: 1; }
+  .price-amount span { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .price-desc { font-size: 11px; color: var(--muted); }
+  .price-features { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .price-features li { font-size: 11px; color: #888; display: flex; align-items: flex-start; gap: 8px; }
+  .price-features li::before { content: ''; display: inline-block; width: 10px; height: 7px; border-left: 2px solid var(--green); border-bottom: 2px solid var(--green); transform: rotate(-45deg) translateY(-2px); flex-shrink: 0; margin-top: 4px; }
+
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    .nav-links { display: none; }
+    .nav-mobile-toggle { display: block; }
+    section { padding: 60px 20px; }
+    .hero { padding: 90px 20px 60px; }
+    .about-grid, .contact-grid { grid-template-columns: 1fr; }
+    .store-grid { grid-template-columns: 1fr; }
+    .hero-name { letter-spacing: -2px; }
+    footer { padding: 20px; }
+  }
+
+  /* ANIMATIONS ON SCROLL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* SVG icon helpers */
+  .ico { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ico svg { display: block; }
+  .skill-card-title .ico { margin-right: 6px; }
+  .info-icon .ico, .contact-icon .ico { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#home" class="nav-logo">r4deennn</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#store">Store</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nav-search-btn" onclick="openCmd()" title="Search">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/>
+      </svg>
+      Search
+    </button>
+    <button class="nav-theme" id="themeBtn" title="Toggle theme" onclick="toggleTheme()">
+      <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+    <button class="nav-mobile-toggle" onclick="toggleMobileMenu()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+</nav>
+
+<!-- COMMAND PALETTE -->
+<div class="cmd-overlay" id="cmdOverlay" onclick="closeOnOverlay(event)">
+  <div class="cmd-box" id="cmdBox">
+    <div class="cmd-input-wrap">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/>
+      </svg>
+      <input class="cmd-input" id="cmdInput" placeholder="Cari menu..." oninput="filterCmd()" onkeydown="cmdKeydown(event)" autocomplete="off" spellcheck="false">
+      <span class="cmd-esc">ESC</span>
+    </div>
+    <div class="cmd-results" id="cmdResults"></div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section id="home" class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Available for freelance projects
+    </div>
+    <h1 class="hero-name">Pino<br>Fandu<br>Winata</h1>
+    <p class="hero-title">Software Engineer & Full Stack Developer</p>
+    <p class="hero-desc">
+      Passionate about building production-ready, scalable web applications from front-end to back-end. 
+      Specializing in Next.js, TypeScript, and modern tooling with 2+ years of experience.
+    </p>
+    <div class="hero-links">
+      <a href="#projects" class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg> View Projects</a>
+      <a href="#contact" class="btn btn-outline">Get in touch</a>
+      <a href="https://wa.me/6283127249275?text=Halo%20Radeennn%2C%20saya%20tertarik%20dengan%20layanan%20Anda" target="_blank" class="btn btn-wa"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2.009C6.478 2.009 2 6.487 2 12.009c0 1.951.554 3.77 1.516 5.315L2 22l4.806-1.489A9.956 9.956 0 0 0 12 22.009c5.522 0 10-4.478 10-10s-4.478-10-10-10z" fill-rule="evenodd"/></svg> WhatsApp</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>scroll to explore</span>
+  </div>
+</section>
+
+<div class="section-divider" style="max-width:900px;margin:0 auto;"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-label">Background</div>
+  <h2 class="section-title">About Me</h2>
+  <div class="about-grid reveal">
+    <div class="about-text">
+      <p>Hello, World! I am <span>Pino Fandu Winata</span> — a Full Stack Developer from Indonesia passionate about creating efficient, user-centric web solutions from front-end to back-end.</p>
+      <p>With <span>2+ years of experience</span>, I specialize in building production-ready, scalable web applications using Next.js, TypeScript, and modern tooling. I'm also experienced in integrating AI capabilities and third-party APIs.</p>
+      <p>I effectively leverage AI-assisted development tools like <span>Cursor</span> to accelerate development and improve code quality.</p>
+      <p>One of my flagship projects is <span>Kreasi</span>, an open-source link-in-bio platform with a drag-and-drop block editor, digital product sales, and a financial ledger system — built with TanStack Start, tRPC, and Midtrans.</p>
+    </div>
+    <div class="about-info">
+      <div class="info-row">
+        <span class="info-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span>
+        <span class="info-label">Role</span>
+        <span class="info-val">Full Stack Developer/Freelance</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+        <span class="info-label">Location</span>
+        <span class="info-val">Pontianak, Kalimantan Barat</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.32 2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.29 6.29l.96-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+        <span class="info-label">Phone</span>
+        <span class="info-val">+6283127249275</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+        <span class="info-label">Email</span>
+        <span class="info-val">pinofanduwinata@gmail.com</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+        <span class="info-label">Website</span>
+        <span class="info-val">coming soon</span>
+      </div>
+      <div class="info-row">
+        <span class="info-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        <span class="info-label">Pronouns</span>
+        <span class="info-val">he/him</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider" style="max-width:900px;margin:0 auto;"></div>
+
+<!-- SKILLS / STACK -->
+<section id="skills">
+  <div class="section-label">Technologies</div>
+  <h2 class="section-title">Stack & Skills</h2>
+
+  <div class="skills-grid">
+    <div class="skill-card reveal reveal-delay-1">
+      <div class="skill-card-title"><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg> Frontend</div>
+      <div class="skill-tags">
+        <span class="skill-tag">React</span>
+        <span class="skill-tag">Next.js</span>
+        <span class="skill-tag">TypeScript</span>
+        <span class="skill-tag">TanStack</span>
+        <span class="skill-tag">Tailwind CSS</span>
+        <span class="skill-tag">Shadcn/ui</span>
+        <span class="skill-tag">Framer Motion</span>
+        <span class="skill-tag">Radix UI</span>
+      </div>
+    </div>
+    <div class="skill-card reveal reveal-delay-2">
+      <div class="skill-card-title"><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg> Backend</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Node.js</span>
+        <span class="skill-tag">tRPC</span>
+        <span class="skill-tag">REST API</span>
+        <span class="skill-tag">GraphQL</span>
+        <span class="skill-tag">Hono</span>
+        <span class="skill-tag">Express</span>
+        <span class="skill-tag">Better Auth</span>
+        <span class="skill-tag">Resend</span>
+      </div>
+    </div>
+    <div class="skill-card reveal reveal-delay-3">
+      <div class="skill-card-title"><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg> Database & Tools</div>
+      <div class="skill-tags">
+        <span class="skill-tag">PostgreSQL</span>
+        <span class="skill-tag">Prisma ORM</span>
+        <span class="skill-tag">Drizzle ORM</span>
+        <span class="skill-tag">Supabase</span>
+        <span class="skill-tag">Neon</span>
+        <span class="skill-tag">Redis</span>
+        <span class="skill-tag">Git</span>
+        <span class="skill-tag">Docker</span>
+      </div>
+    </div>
+    <div class="skill-card reveal reveal-delay-1">
+      <div class="skill-card-title"><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg> Design & Others</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Figma</span>
+        <span class="skill-tag">Photoshop</span>
+        <span class="skill-tag">UI/UX Design</span>
+        <span class="skill-tag">Midtrans</span>
+        <span class="skill-tag">Google APIs</span>
+        <span class="skill-tag">Gemini AI</span>
+        <span class="skill-tag">OpenAI</span>
+        <span class="skill-tag">Vercel</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider" style="max-width:900px;margin:0 auto;"></div>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-label">Career</div>
+  <h2 class="section-title">Experience</h2>
+
+  <div class="exp-list reveal">
+    <div class="exp-item">
+      <div>
+        <div class="exp-company">Tegal Tourism</div>
+        <div class="exp-role">Full Stack Developer</div>
+        <span class="exp-type">Part-time</span>
+      </div>
+      <div class="exp-period">10.2025 — 12.2025</div>
+    </div>
+    <div class="exp-item">
+      <div>
+        <div class="exp-company">JejakRempah Marketplace</div>
+        <div class="exp-role">Full Stack Developer</div>
+        <span class="exp-type">Part-time</span>
+      </div>
+      <div class="exp-period">08.2025 — 12.2025</div>
+    </div>
+    <div class="exp-item">
+      <div>
+        <div class="exp-company">Harber Marketplace</div>
+        <div class="exp-role">Frontend Developer</div>
+        <span class="exp-type">Freelance</span>
+      </div>
+      <div class="exp-period">06.2024 — 09.2024</div>
+    </div>
+    <div class="exp-item">
+      <div>
+        <div class="exp-company">Harkat English Club</div>
+        <div class="exp-role">Graphic Designer</div>
+        <span class="exp-type">Freelance</span>
+      </div>
+      <div class="exp-period">2023 — ∞</div>
+    </div>
+    <div class="exp-item">
+      <div>
+        <div class="exp-company">Freelance / Self-employed</div>
+        <div class="exp-role">Full Stack Developer</div>
+        <span class="exp-type present">Present</span>
+      </div>
+      <div class="exp-period">03.2024 — Now</div>
+    </div>
+    <div class="exp-item">
+      <div>
+        <div class="exp-company">Freelance / Self-employed</div>
+        <div class="exp-role">UI/UX & Graphic Designer</div>
+        <span class="exp-type">Freelance</span>
+      </div>
+      <div class="exp-period">2021 — 2023</div>
+    </div>
+  </div>
+
+  <br><br>
+  <div class="section-label">Education</div>
+  <h3 style="font-family:var(--sans);font-size:22px;font-weight:800;color:var(--accent);margin-bottom:24px;letter-spacing:-0.5px;">Education</h3>
+  <div class="exp-list reveal">
+    <div class="exp-item">
+      <div>
+        <div class="exp-company">Universitas Muhammadiyah Pontianak</div>
+        <div class="exp-role">(S1) Information System</div>
+      </div>
+      <div class="exp-period">01.2024 — Present</div>
+    </div>
+    <div class="exp-item">
+      <div>
+        <div class="exp-company">SMKN Mempawah Timur</div>
+        <div class="exp-role">Tehnik Mesin</div>
+      </div>
+      <div class="exp-period">2020 — 2023</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider" style="max-width:900px;margin:0 auto;"></div>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-label">Work</div>
+  <h2 class="section-title">Projects <span style="color:var(--muted);font-size:20px;">(9)</span></h2>
+
+  <div class="projects-grid">
+    <div class="project-card reveal">
+      <div class="project-header">
+        <div class="project-name">Kreasi — Link-in-Bio Platform</div>
+        <div class="project-date">01.2026 — ∞</div>
+      </div>
+      <p class="project-desc">An open-source link-in-bio platform with profile customization, drag-and-drop block editor, and integrated digital product sales. Features an append-only ledger financial system for transaction records, creator balance calculation, and automated payout management. Integrates Midtrans payment gateway with webhook handler for real-time payment processing and email notifications via Resend.</p>
+      <div class="project-tags">
+        <span class="project-tag">TanStack Start</span>
+        <span class="project-tag">React 19</span>
+        <span class="project-tag">TypeScript</span>
+        <span class="project-tag">Tailwind CSS</span>
+        <span class="project-tag">PostgreSQL</span>
+        <span class="project-tag">Drizzle ORM</span>
+        <span class="project-tag">tRPC</span>
+        <span class="project-tag">Midtrans</span>
+      </div>
+      <div class="project-links">
+        <a href="#" class="project-link"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Live Demo</a>
+        <a href="#" class="project-link"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg> GitHub</a>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-header">
+        <div class="project-name">Jejak Rempah Marketplace</div>
+        <div class="project-date">08.2025 — 12.2025</div>
+      </div>
+      <p class="project-desc">A full-featured e-commerce marketplace specializing in Indonesian spices and herbs. Includes product management, cart system, payment integration, and seller dashboard with analytics.</p>
+      <div class="project-tags">
+        <span class="project-tag">Next.js</span>
+        <span class="project-tag">TypeScript</span>
+        <span class="project-tag">Tailwind CSS</span>
+        <span class="project-tag">Prisma</span>
+        <span class="project-tag">PostgreSQL</span>
+      </div>
+      <div class="project-links">
+        <a href="#" class="project-link"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Live Demo</a>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-header">
+        <div class="project-name">Jeda — Pomodoro Timer App</div>
+        <div class="project-date">11.2025 — ∞</div>
+      </div>
+      <p class="project-desc">A Pomodoro timer app with productivity stats, leaderboard, ambient sounds, and Better Auth integration. Helps users track focus sessions and compete with others.</p>
+      <div class="project-tags">
+        <span class="project-tag">React</span>
+        <span class="project-tag">TypeScript</span>
+        <span class="project-tag">Better Auth</span>
+        <span class="project-tag">Drizzle ORM</span>
+        <span class="project-tag">Neon</span>
+      </div>
+      <div class="project-links">
+        <a href="#" class="project-link"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Live Demo</a>
+        <a href="#" class="project-link"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg> GitHub</a>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-header">
+        <div class="project-name">Heal — AI Health Companion</div>
+        <div class="project-date">09.2025 — ∞</div>
+      </div>
+      <p class="project-desc">An AI-powered health companion application that provides personalized health insights, symptom checking, and wellness tracking using Google Gemini AI.</p>
+      <div class="project-tags">
+        <span class="project-tag">Next.js</span>
+        <span class="project-tag">Gemini AI</span>
+        <span class="project-tag">TypeScript</span>
+        <span class="project-tag">Tailwind CSS</span>
+      </div>
+      <div class="project-links">
+        <a href="#" class="project-link"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Live Demo</a>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-header">
+        <div class="project-name">Righsponse — AI Writing Assistant</div>
+        <div class="project-date">07.2025 — ∞</div>
+      </div>
+      <p class="project-desc">An AI-powered writing assistant built with Google Gemini API, helping users craft better content, emails, and responses with intelligent suggestions and tone adjustment.</p>
+      <div class="project-tags">
+        <span class="project-tag">Next.js</span>
+        <span class="project-tag">Google Gemini</span>
+        <span class="project-tag">TypeScript</span>
+        <span class="project-tag">Resend</span>
+      </div>
+      <div class="project-links">
+        <a href="#" class="project-link"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Live Demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider" style="max-width:900px;margin:0 auto;"></div>
+
+<!-- CERTIFICATES -->
+<section id="certificates">
+  <div class="section-label">Achievements</div>
+  <h2 class="section-title">Certificates</h2>
+  <div class="cert-grid reveal">
+    <div class="cert-card">
+      <div class="cert-name">React Developer Certification</div>
+      <div class="cert-issuer">Dicoding Indonesia</div>
+      <span class="cert-year">2024</span>
+    </div>
+    <div class="cert-card">
+      <div class="cert-name">JavaScript Advanced</div>
+      <div class="cert-issuer">Dicoding Indonesia</div>
+      <span class="cert-year">2023</span>
+    </div>
+    <div class="cert-card">
+      <div class="cert-name">Web Development Fundamentals</div>
+      <div class="cert-issuer">Dicoding Indonesia</div>
+      <span class="cert-year">2023</span>
+    </div>
+    <div class="cert-card">
+      <div class="cert-name">UI/UX Design Principles</div>
+      <div class="cert-issuer">Google via Coursera</div>
+      <span class="cert-year">2022</span>
+    </div>
+    <div class="cert-card">
+      <div class="cert-name">TypeScript Fundamentals</div>
+      <div class="cert-issuer">Udemy</div>
+      <span class="cert-year">2024</span>
+    </div>
+    <div class="cert-card">
+      <div class="cert-name">Database Engineering</div>
+      <div class="cert-issuer">Dicoding Indonesia</div>
+      <span class="cert-year">2024</span>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider" style="max-width:900px;margin:0 auto;"></div>
+
+<!-- STORE -->
+<section id="store">
+  <div class="section-label">Services</div>
+  <h2 class="section-title">Radeenn's Store</h2>
+  <p style="color:var(--muted);font-size:12px;margin-bottom:32px;">A collection of web development packages tailored for your business needs.</p>
+
+  <div class="store-grid reveal">
+    <!-- Paket UMKM -->
+    <div class="price-card">
+      <div class="price-card-name">Paket UMKM</div>
+      <div class="price-amount">Rp 400.000 <span>/ project</span></div>
+      <div class="price-desc">Direkomendasikan untuk UMKM yang ingin mengoptimalkan produktivitas dengan katalog lengkap</div>
+      <ul class="price-features">
+        <li>3 Halaman Website</li>
+        <li>Free Domain .com</li>
+        <li>Aktif 1 Tahun</li>
+        <li>Basic Landing Page Design</li>
+        <li>Basic Copy Writing</li>
+        <li>Akses Dashboard Website</li>
+        <li>Tombol WhatsApp</li>
+        <li>Gallery Produk</li>
+        <li>Integrasi Sosial Media</li>
+      </ul>
+      <a href="https://wa.me/6283127249275?text=Halo%20Radeennn%2C%20saya%20tertarik%20dengan%20Paket%20UMKM%20Rp%201.000.000.%20Bisa%20info%20lebih%20lanjut%3F" target="_blank" class="btn btn-outline" style="width:100%;justify-content:center;">Pesan Sekarang</a>
+    </div>
+
+    <!-- Paket Bisnis -->
+    <div class="price-card featured">
+      <div class="price-badge">Rekomendasi</div>
+      <div class="price-card-name">Paket Bisnis</div>
+      <div class="price-amount">Rp 1.500.000 <span>/ project</span></div>
+      <div class="price-desc">Cocok untuk Profile Bisnis, Portal Berita, Sekolah/Yayasan, Portofolio</div>
+      <ul class="price-features">
+        <li>30+ Halaman Website</li>
+        <li>Free Domain (.com/.id/.org)</li>
+        <li>Dedicated Hosting</li>
+        <li>Aktif 1 Tahun</li>
+        <li>Custom Web Design</li>
+        <li>Free Logo Design</li>
+        <li>Advanced Copy Writing</li>
+        <li>Live Chat Integration</li>
+        <li>Multi Bahasa</li>
+        <li>Akses Panel Hosting</li>
+        <li>Analytic Traffic</li>
+        <li>SEO Optimization</li>
+        <li>Setting 5 Email Domain</li>
+        <li>6 Article/Blog</li>
+        <li>Google Maps Integration</li>
+      </ul>
+      <a href="https://wa.me/6283127249275?text=Halo%20Radeennn%2C%20saya%20tertarik%20dengan%20Paket%20Bisnis%20Rp%204.525.000.%20Bisa%20info%20lebih%20lanjut%3F" target="_blank" class="btn btn-primary" style="width:100%;justify-content:center;">Pesan Sekarang</a>
+    </div>
+
+    <!-- Paket Custom -->
+    <div class="price-card">
+      <div class="price-card-name">Paket Custom</div>
+      <div class="price-amount">Custom Price</div>
+      <div class="price-desc">Solusi khusus dengan fitur sesuai kebutuhan</div>
+      <ul class="price-features">
+        <li>Semua Fitur Paket Bisnis High</li>
+        <li>Free Domain (.com/.id/.org)</li>
+        <li>Dedicated Hosting</li>
+        <li>Aktif 1 Tahun</li>
+        <li>LMS/Online Class</li>
+        <li>Donation Website</li>
+        <li>Hotel Booking System</li>
+        <li>Job Listing + Profile Builder</li>
+        <li>Bookstore Website</li>
+        <li>Appointment System</li>
+        <li>Video Listing Website</li>
+      </ul>
+      <a href="https://wa.me/6283127249275?text=Halo%20Radeennn%2C%20saya%20tertarik%20dengan%20Paket%20Custom.%20Bisa%20diskusi%20lebih%20lanjut%3F" target="_blank" class="btn btn-outline" style="width:100%;justify-content:center;">Pesan Sekarang</a>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider" style="max-width:900px;margin:0 auto;"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label">Get in Touch</div>
+  <h2 class="section-title">Contact</h2>
+
+  <div class="contact-grid reveal">
+    <div class="contact-text">
+      <h3>Let's connect and collaborate!</h3>
+      <p>Have a project in mind? Looking for a developer to join your team? Or just want to say hello? I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.</p>
+      <a href="https://wa.me/6283127249275?text=Halo%20Radeennn%2C%20saya%20ingin%20berkolaborasi%20dengan%20kamu!" target="_blank" class="btn btn-wa" style="margin-bottom:16px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2C6.478 2 2 6.478 2 12c0 1.95.554 3.77 1.516 5.315L2 22l4.806-1.489A9.956 9.956 0 0 0 12 22c5.522 0 10-4.478 10-10S17.522 2 11.999 2z"/></svg> Chat via WhatsApp</a>
+    </div>
+
+    <div class="contact-links">
+      <a href="mailto:pinofanduwinata@gmail.com" class="contact-link-item">
+        <span class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-val">pinofanduwinata@gmail.com</div>
+        </div>
+      </a>
+      <a href="https://wa.me/6283127249275" target="_blank" class="contact-link-item">
+        <span class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.478 2 2 6.478 2 12c0 1.95.554 3.77 1.516 5.315L2 22l4.806-1.489A9.956 9.956 0 0 0 12 22c5.522 0 10-4.478 10-10S17.522 2 12 2z"/></svg></span>
+        <div>
+          <div class="contact-label">WhatsApp</div>
+          <div class="contact-val">+62 831-2724-9275</div>
+        </div>
+      </a>
+      <a href="https://linkedin.com/in/" target="_blank" class="contact-link-item">
+        <span class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></span>
+        <div>
+          <div class="contact-label">LinkedIn</div>
+          <div class="contact-val">r4deennnnn</div>
+        </div>
+      </a>
+      <a href="https://github.com/radeenn" target="_blank" class="contact-link-item">
+        <span class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg></span>
+        <div>
+          <div class="contact-label">GitHub</div>
+          <div class="contact-val">radeenn</div>
+        </div>
+      </a>
+      <a href="https://instagram.com/nooowrlccup" target="_blank" class="contact-link-item">
+        <span class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></span>
+        <div>
+          <div class="contact-label">Instagram</div>
+          <div class="contact-val">nooowrldcup</div>
+        </div>
+      </a>
+      <a href="https://youtube.com/@" target="_blank" class="contact-link-item">
+        <span class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></span>
+        <div>
+          <div class="contact-label">YouTube</div>
+          <div class="contact-val">r4dennnnstilllearning</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-text">
+    Built by <a href="#">r4deennn</a>. The source code is available on <a href="#">GitHub</a>.
+  </div>
+  <div class="footer-socials">
+    <a href="https://linkedin.com/in/" target="_blank" class="footer-social" title="LinkedIn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+    <a href="https://github.com/radeenn" target="_blank" class="footer-social" title="GitHub"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg></a>
+    <a href="https://instagram.com/nooowrldcup" target="_blank" class="footer-social" title="Instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+    <a href="https://wa.me/6283127249275" target="_blank" class="footer-social" title="WhatsApp"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.478 2 2 6.478 2 12c0 1.95.554 3.77 1.516 5.315L2 22l4.806-1.489A9.956 9.956 0 0 0 12 22c5.522 0 10-4.478 10-10S17.522 2 12 2z"/></svg></a>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+reveals.forEach(el => observer.observe(el));
+
+// Mobile menu
+let mobileOpen = false;
+function toggleMobileMenu() {
+  const links = document.querySelector('.nav-links');
+  mobileOpen = !mobileOpen;
+  if (mobileOpen) {
+    links.style.display = 'flex';
+    links.style.flexDirection = 'column';
+    links.style.position = 'fixed';
+    links.style.top = '60px';
+    links.style.left = '0';
+    links.style.right = '0';
+    links.style.background = 'rgba(10,10,10,0.98)';
+    links.style.padding = '20px 32px';
+    links.style.gap = '16px';
+    links.style.borderBottom = '1px solid #222';
+    links.style.zIndex = '99';
+  } else {
+    links.style.display = 'none';
+  }
+}
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => { if (mobileOpen) toggleMobileMenu(); });
+});
+
+// Active nav highlight
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+const navObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + e.target.id ? 'var(--accent)' : '';
+      });
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => navObserver.observe(s));
+
+// THEME TOGGLE
+const moonSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+const sunSVG  = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  document.getElementById('themeBtn').innerHTML = isLight ? sunSVG : moonSVG;
+}
+
+// COMMAND PALETTE — SVG icons, no emoji
+const svgHome = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
+const svgUser = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+const svgZap  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+const svgBox  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+const svgBrief= `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>`;
+const svgAward= `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`;
+const svgShop = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`;
+const svgMail = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`;
+
+const cmdItems = [
+  { icon: svgHome,  label: 'Home',         href: '#home' },
+  { icon: svgUser,  label: 'About',        href: '#about' },
+  { icon: svgZap,   label: 'Skills',       href: '#skills' },
+  { icon: svgBox,   label: 'Projects',     href: '#projects' },
+  { icon: svgBrief, label: 'Experience',   href: '#experience' },
+  { icon: svgAward, label: 'Certificates', href: '#certificates' },
+  { icon: svgShop,  label: 'Store',        href: '#store' },
+  { icon: svgMail,  label: 'Contact',      href: '#contact' },
+];
+let cmdActiveIdx = 0;
+
+function renderCmd(items) {
+  const r = document.getElementById('cmdResults');
+  if (!items.length) {
+    r.innerHTML = '<div class="cmd-empty">Tidak ada hasil ditemukan</div>';
+    return;
+  }
+  r.innerHTML = '<div class="cmd-section-label">Navigasi</div>' +
+    items.map((it, i) =>
+      `<a class="cmd-item${i===0?' active':''}" href="${it.href}" onclick="closeCmd()" data-idx="${i}">
+        <span class="cmd-item-icon">${it.icon}</span>${it.label}
+      </a>`
+    ).join('');
+  cmdActiveIdx = 0;
+}
+
+function filterCmd() {
+  const q = document.getElementById('cmdInput').value.toLowerCase();
+  const filtered = cmdItems.filter(it => it.label.toLowerCase().includes(q));
+  renderCmd(filtered);
+}
+
+function openCmd() {
+  document.getElementById('cmdOverlay').classList.add('open');
+  document.getElementById('cmdInput').value = '';
+  renderCmd(cmdItems);
+  setTimeout(() => document.getElementById('cmdInput').focus(), 50);
+}
+
+function closeCmd() {
+  document.getElementById('cmdOverlay').classList.remove('open');
+}
+
+function closeOnOverlay(e) {
+  if (e.target === document.getElementById('cmdOverlay')) closeCmd();
+}
+
+function cmdKeydown(e) {
+  const items = document.querySelectorAll('.cmd-item');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    cmdActiveIdx = Math.min(cmdActiveIdx + 1, items.length - 1);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    cmdActiveIdx = Math.max(cmdActiveIdx - 1, 0);
+  } else if (e.key === 'Enter') {
+    items[cmdActiveIdx].click();
+    closeCmd();
+    return;
+  } else if (e.key === 'Escape') {
+    closeCmd(); return;
+  }
+  items.forEach((el, i) => el.classList.toggle('active', i === cmdActiveIdx));
+  items[cmdActiveIdx].scrollIntoView({ block: 'nearest' });
+}
+
+// Keyboard shortcut ⌘K / Ctrl+K
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    const overlay = document.getElementById('cmdOverlay');
+    overlay.classList.contains('open') ? closeCmd() : openCmd();
+  }
+  if (e.key === 'Escape') closeCmd();
+});
+</script>
+</body>
+</html>
